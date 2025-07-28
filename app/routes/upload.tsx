@@ -78,7 +78,8 @@ const Upload = () => {
       data.feedback = JSON.parse(feedbackText);
       await kv.set(uuid, JSON.stringify(data));
       setStatusText('Analysis complete! Redirecting...');
-      console.log(data);
+      navigate(`/resume/${uuid}`);
+      // console.log(data);
     } catch (error) {
       setStatusText(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       console.log(error);
