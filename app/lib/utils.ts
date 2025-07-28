@@ -1,4 +1,6 @@
 
+export const generateUUID = ()=>crypto.randomUUID();
+
 export function formatSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
 
