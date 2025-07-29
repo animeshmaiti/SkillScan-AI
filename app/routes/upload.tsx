@@ -59,7 +59,7 @@ const Upload = () => {
         companyName,jobTitle,jobDescription,
         feedback:''
       }
-      await kv.set(uuid, JSON.stringify(data));
+      await kv.set(`resume:${uuid}`, JSON.stringify(data));
 
       setStatusText('Analyzing resume...');
       const feedback=await ai.feedback(
@@ -76,7 +76,7 @@ const Upload = () => {
         : feedback.message.content[0].text;
 
       data.feedback = JSON.parse(feedbackText);
-      await kv.set(uuid, JSON.stringify(data));
+      await kv.set(`resume:${uuid}`, JSON.stringify(data));
       setStatusText('Analysis complete! Redirecting...');
       navigate(`/resume/${uuid}`);
       // console.log(data);
