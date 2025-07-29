@@ -13,7 +13,7 @@ const ScoreBadge = ({ score }: { score: number }) => {
         'flex flex-row gap-1 items-center px-2 py-0.5 rounded-[96px]',
         score > 69
           ? 'bg-badge-green'
-          : score > 39
+          : score > 49
           ? 'bg-badge-yellow'
           : 'bg-badge-red'
       )}
@@ -28,7 +28,7 @@ const ScoreBadge = ({ score }: { score: number }) => {
           'text-sm font-medium',
           score > 69
             ? 'text-badge-green-text'
-            : score > 39
+            : score > 49
             ? 'text-badge-yellow-text'
             : 'text-badge-red-text'
         )}
