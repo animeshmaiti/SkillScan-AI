@@ -1,14 +1,16 @@
 import { Link } from 'react-router';
 import ScoreCircle from './ScoreCircle';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePuterStore } from '~/lib/puter';
 
 const ResumeCard = ({
-  resume: { id, companyName, jobTitle, feedback, imagePath },
+  resume: { id, companyName, jobTitle, feedback, imagePath,resumePath },
+  onDelete,
 }: {
   resume: Resume;
+  onDelete?: () => void;
 }) => {
-  const { fs } = usePuterStore();
+  const { fs, kv } = usePuterStore();
   const [resumeUrl, setResumeUrl] = useState('');
   useEffect(() => {
     const loadResume = async () => {
@@ -19,10 +21,20 @@ const ResumeCard = ({
     };
     loadResume();
   }, [imagePath]);
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Delete files: main resume file and the image
+    await fs.delete(resumePath);
+    await fs.delete(imagePath);
+    // Delete metadata from kv store
+    await kv.del(`resume:${id}`);
+    // Notify parent to refresh
+    if (onDelete) onDelete();
+  };
   return (
     <Link
       to={`/resume/${id}`}
-      className="resume-card animate-in fade-in duration-1000"
+      className="relative resume-card animate-in fade-in duration-1000"
     >
       <div className="resume-card-header">
         <div className="flex flex-col gap-2">
@@ -39,6 +51,13 @@ const ResumeCard = ({
         <div className="flex-shrink-0">
           <ScoreCircle score={feedback.overallScore} />
         </div>
+        <button
+          className="absolute top-2 right-2 p-1 rounded hover:bg-red-100 transition cursor-pointer"
+          title="Delete Resume"
+          onClick={handleDelete}
+        >
+          <img src="/icons/trash.svg" alt="Delete" className="w-6 h-6" />
+        </button>
       </div>
       {resumeUrl && (
         <div className="gradient-border animate-in fade-in duration-1000">

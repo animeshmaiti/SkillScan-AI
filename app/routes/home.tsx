@@ -20,6 +20,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
+  const [reloadFlag, setReloadFlag] = useState(false);
 
   useEffect(() => {
     if (!auth.isAuthenticated) {
@@ -43,7 +44,7 @@ export default function Home() {
       }
     };
     loadResumes();
-  }, []);
+  }, [reloadFlag]);
 
   return (
     <main className="bg-[url('/images/bg-main.svg')] bg-cover">
@@ -67,7 +68,7 @@ export default function Home() {
         {!loadingResumes && resumes.length > 0 && (
           <div className="resumes-section">
             {resumes.map((resume) => (
-              <ResumeCard key={resume.id} resume={resume} />
+              <ResumeCard key={resume.id} resume={resume} onDelete={() => setReloadFlag((f) => !f)}/>
             ))}
           </div>
         )}
