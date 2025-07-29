@@ -1,6 +1,5 @@
-
 import { prepareInstructions } from '../../constants';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import FileUploader from '~/components/FileUploader';
 import Navbar from '~/components/Navbar';
@@ -9,7 +8,7 @@ import { usePuterStore } from '~/lib/puter';
 import { generateUUID } from '~/lib/utils';
 
 const Upload = () => {
-  const {auth,isLoading,fs,ai,kv}=usePuterStore();
+  const { auth, fs, ai, kv } = usePuterStore();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState('');
@@ -18,7 +17,11 @@ const Upload = () => {
   const handleFileSelect = (file: File | null) => {
     setFile(file);
   };
-
+  useEffect(() => {
+    if (!auth.isAuthenticated) {
+      navigate('/auth?next=/upload');
+    }
+  }, [auth.isAuthenticated]);
   const handleAnalyze = async ({
     companyName,
     jobTitle,
@@ -51,37 +54,43 @@ const Upload = () => {
       }
 
       setStatusText('Preparing data...');
-      const uuid=generateUUID();
-      const data ={
+      const uuid = generateUUID();
+      const data = {
         id: uuid,
-        resumePath:uploadedFile.path,
+        resumePath: uploadedFile.path,
         imagePath: uploadedImage.path,
-        companyName,jobTitle,jobDescription,
-        feedback:''
-      }
+        companyName,
+        jobTitle,
+        jobDescription,
+        feedback: '',
+      };
       await kv.set(`resume:${uuid}`, JSON.stringify(data));
 
       setStatusText('Analyzing resume...');
-      const feedback=await ai.feedback(
+      const feedback = await ai.feedback(
         uploadedFile.path,
         prepareInstructions({
-          jobTitle,jobDescription
+          jobTitle,
+          jobDescription,
         })
-      )
+      );
       if (!feedback) {
         throw new Error('AI analysis failed');
       }
-      const feedbackText=typeof feedback.message.content === 'string'
-        ? feedback.message.content
-        : feedback.message.content[0].text;
-
+      const feedbackText =
+        typeof feedback.message.content === 'string'
+          ? feedback.message.content
+          : feedback.message.content[0].text;
+      // console.log('Feedback:', feedbackText);
       data.feedback = JSON.parse(feedbackText);
       await kv.set(`resume:${uuid}`, JSON.stringify(data));
       setStatusText('Analysis complete! Redirecting...');
+      console.log(feedback);
       navigate(`/resume/${uuid}`);
-      // console.log(data);
     } catch (error) {
-      setStatusText(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatusText(
+        `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       console.log(error);
     } finally {
       setIsProcessing(false);
@@ -97,7 +106,7 @@ const Upload = () => {
     const jobTitle = formData.get('job-title') as string;
     const jobDescription = formData.get('job-description') as string;
     if (!file) return;
-    handleAnalyze({companyName, jobTitle, jobDescription, file});
+    handleAnalyze({ companyName, jobTitle, jobDescription, file });
   };
   return (
     <main className="bg-[url('/images/bg-main.svg')] bg-cover">
