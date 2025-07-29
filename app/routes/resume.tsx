@@ -28,7 +28,7 @@ const Resume = () => {
   useEffect(() => {
     const loadResume = async () => {
       if (!id) return;
-      const resume = await kv.get(id);
+      const resume = await kv.get(`resume:${id}`);
       if (!resume) return;
       const data = JSON.parse(resume);
       const resumeBlob = await fs.read(data.resumePath);
@@ -41,7 +41,6 @@ const Resume = () => {
       setFeedback(data.feedback);
     };
     loadResume();
-    console.log({ resumeUrl, imageUrl, feedback });
   }, [id]);
   return (
     <main className="!pt-0">
