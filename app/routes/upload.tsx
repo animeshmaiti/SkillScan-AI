@@ -81,19 +81,17 @@ const Upload = () => {
         typeof feedback.message.content === 'string'
           ? feedback.message.content
           : feedback.message.content[0].text;
-      // console.log('Feedback:', feedbackText);
       data.feedback = JSON.parse(feedbackText);
       await kv.set(`resume:${uuid}`, JSON.stringify(data));
       setStatusText('Analysis complete! Redirecting...');
-      console.log(feedback);
+      setIsProcessing(false);
+      // console.log(feedback);
       navigate(`/resume/${uuid}`);
     } catch (error) {
       setStatusText(
         `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
       console.log(error);
-    } finally {
-      setIsProcessing(false);
     }
   };
 
